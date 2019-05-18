@@ -1,5 +1,3 @@
-
-
 function ConvertFrom-JsonToHashtable {
 
     <# 
@@ -48,7 +46,6 @@ function ConvertFrom-JsonToHashtable {
 
     return $dict
 }
-
 function Get-WebClient {
     param
     (
@@ -65,8 +62,7 @@ function Get-WebClient {
     $wc.Headers.Add("Authorization", "Basic $base64");
     $wc
 }
-
-function Get-AuthenticatedGitUri {
+function Get-AzDevOpsAuthenticatedGitUri {
     param
     (
         $uri,
@@ -78,8 +74,7 @@ function Get-AuthenticatedGitUri {
     $address = $uri.substring($uri.indexOf($colonSlashSlash) + $colonSlashSlash.length)
     return $protocol + $colonSlashSlash + $token + "@" + $address
 }
-
-function Get-TeamProjectList {
+function Get-AzDevOpsTeamProjectList {
     param
     (
         $tfsUri ,
@@ -95,8 +90,7 @@ function Get-TeamProjectList {
     $jsondata = $wc.DownloadString($uri) | ConvertFrom-Json 
     $jsondata.value | select-object -property @{Name = "Name"; Expression = { $_.name } }
 }
-
-function Get-WorkItemTypes {
+function Get-AzDevOpsWorkItemTypes {
     param
     (
         $Instance,
@@ -120,8 +114,7 @@ function Get-WorkItemTypes {
     
     $jsondata.value | select-object -property @{Name = "name"; Expression = { $_.name } }
 }
-
-function Get-GitRepo {
+function Get-AzDevOpsGitRepo {
     param
     (
         $name,
@@ -136,8 +129,7 @@ function Get-GitRepo {
     # Git send info to stderr it should not, redirecting it 
     & git clone $fixeduri 2>&1 | % { $_.ToString() }
 }
-
-function Get-TfvcContent {
+function Get-AzDevOpsTfvcContent {
     param
     (
         $instance ,
@@ -161,8 +153,7 @@ function Get-TfvcContent {
         Write-Host "    No TFVC content for project"
     }
 }
-
-function Get-GitBranchesForRepo {
+function Get-AzDevOpsGitBranchesForRepo {
     param
     (
         $instance ,
@@ -185,8 +176,7 @@ function Get-GitBranchesForRepo {
         Write-Host "    No Repos for project"
     }
 }
-
-function Get-GitContent {
+function Get-AzDevOpsGitContent {
     param
     (
         $instance ,
@@ -209,9 +199,7 @@ function Get-GitContent {
     $wc.DownloadFile($url, $file)
     Write-Host "    Finished GIT content download"
 }
-
-
-function Git-GetRepos {
+function Get-AzDevOpsGitRepos {
     param
     (
         $instance,
@@ -227,8 +215,6 @@ function Git-GetRepos {
     $jsondata.value | select-object -property @{Name = "Name"; Expression = { $_.name } }, @{Name = "RemoteUrl"; Expression = { $_.remoteUrl } }
 
 }
-
-
 function Add-Folder {
     param
     (
@@ -245,9 +231,7 @@ function Add-Folder {
     }
 
 }
-
-
-function Backup-AzureDevops {
+function Backup-AzDevOps {
     param
     (
         [Parameter(Mandatory = $true)]
@@ -302,31 +286,30 @@ function Backup-AzureDevops {
 
     Write-Host "`n"
 }
-
-function Export-VSTSWorkItem {  
+function Export-AzDevOpsWorkItem {  
     <#  
 .SYNOPSIS  
     A PowerShell function to export Visual Studio Team Servies work items.   
 .DESCRIPTION  
     A PowerShell function to export Visual Studio Team Servies work items.
 .EXAMPLE  
-    PS C:\> Export-VSTSWorkItem -Instance 'Fabrikam" -Token "PAT"  
+    PS C:\> Export-AzDevOpsWorkItem -Instance 'Fabrikam" -Token "PAT"  
     Export all Workitems of any type.  
 .EXAMPLE  
-    PS C:\> Export-VSTSWorkItem -Instance 'Fabrikam' -Token "PAT" -WorkItemType Bug  
+    PS C:\> Export-AzDevOpsWorkItem -Instance 'Fabrikam' -Token "PAT" -WorkItemType Bug  
     Export Bug Workitems.  
 .EXAMPLE  
-    PS C:\> Export-VSTSWorkItem -Instance 'Fabrikam' -Token "PAT" -WorkItemType Task  
+    PS C:\> Export-AzDevOpsWorkItem -Instance 'Fabrikam' -Token "PAT" -WorkItemType Task  
     Export Task Workitems.    
 .EXAMPLE  
-    PS C:\> Export-VSTSWorkItem -Instance 'Fabrikam' -Token "PAT" -WorkItemType Epic -ExportAs csv  
+    PS C:\> Export-AzDevOpsWorkItem -Instance 'Fabrikam' -Token "PAT" -WorkItemType Epic -ExportAs csv  
     Exports as csv 
 .NOTES  
      
 #>  
     [CmdletBinding()]  
     param (  
-        # AzureDevops Organisation Name
+        # AzDevOps Organisation Name
         [Parameter(Mandatory)]  
         [string] $Instance,  
  
@@ -446,7 +429,6 @@ function Export-VSTSWorkItem {
     end {  
     }  
 }
-
 function Invoke-Menu {
     [cmdletbinding()]
     Param(
@@ -503,7 +485,7 @@ Select a task by number or Q to quit
     }
      
 }
-function Invoke-GitMigration {
+function Invoke-AzDevOpsGitMigration {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $False)] [uri] $SourceRepo,
