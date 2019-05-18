@@ -6,7 +6,7 @@
 - Azure Devops Migration Tools (7.5.66) from nkdAgility - https://github.com/nkdAgility/azure-devops-migration-tools
 
 ## Getting Started
-A Powershell module to migrate/export/import Repos en WorkItems from TFS to Azure Devops
+A Powershell module to migrate/export/import Repos and WorkItems from TFS to Azure Devops
 
 ### How to install Azure CLI
 Go to https://github.com/Azure/azure-cli
