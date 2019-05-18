@@ -15,7 +15,7 @@ function ConvertFrom-JsonToHashtable {
     [CmdletBinding()]
     param(
 
-        [Parameter(Mandatory=$true,Position=0,ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
         [AllowNull()]
         [string]
         $InputObject,
@@ -28,9 +28,10 @@ function ConvertFrom-JsonToHashtable {
     # Perform a test to determine if the inputobject is null, if it is then return an empty hash table
     if ([String]::IsNullOrEmpty($InputObject)) {
 
-        $dict = @{}
+        $dict = @{ }
 
-    } else {
+    }
+    else {
 
         # load the required dll
         [void][System.Reflection.Assembly]::LoadWithPartialName("System.Web.Extensions")
@@ -48,9 +49,8 @@ function ConvertFrom-JsonToHashtable {
     return $dict
 }
 
-function Get-WebClient
-{
- param
+function Get-WebClient {
+    param
     (
         [string]$Token,
         [string]$contentType = "application/json"
@@ -62,12 +62,11 @@ function Get-WebClient
     $pair = ":${Token}"
     $bytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
     $base64 = [System.Convert]::ToBase64String($bytes)
-    $wc.Headers.Add("Authorization","Basic $base64");
+    $wc.Headers.Add("Authorization", "Basic $base64");
     $wc
 }
 
-function Get-AuthenticatedGitUri
-{
+function Get-AuthenticatedGitUri {
     param
     (
         $uri,
@@ -80,9 +79,8 @@ function Get-AuthenticatedGitUri
     return $protocol + $colonSlashSlash + $token + "@" + $address
 }
 
-function Get-TeamProjectList
-{
- param
+function Get-TeamProjectList {
+    param
     (
         $tfsUri ,
         $Token
@@ -95,12 +93,11 @@ function Get-TeamProjectList
     $uri = "$($tfsUri)/_apis/projects?api-version=1.0"
 
     $jsondata = $wc.DownloadString($uri) | ConvertFrom-Json 
-    $jsondata.value | select-object -property @{Name="Name"; Expression = {$_.name}}
+    $jsondata.value | select-object -property @{Name = "Name"; Expression = { $_.name } }
 }
 
-function Get-WorkItemTypes
-{
- param
+function Get-WorkItemTypes {
+    param
     (
         $Instance,
         $Project,
@@ -121,11 +118,10 @@ function Get-WorkItemTypes
     }
 
     
-    $jsondata.value | select-object -property @{Name="name"; Expression = {$_.name}}
+    $jsondata.value | select-object -property @{Name = "name"; Expression = { $_.name } }
 }
 
-function Get-GitRepo
-{
+function Get-GitRepo {
     param
     (
         $name,
@@ -141,9 +137,8 @@ function Get-GitRepo
     & git clone $fixeduri 2>&1 | % { $_.ToString() }
 }
 
-function Get-TfvcContent
-{
- param
+function Get-TfvcContent {
+    param
     (
         $instance ,
         $Token,
@@ -158,19 +153,17 @@ function Get-TfvcContent
     $file = "$backuppath\TFVC-$projectname.zip"
     
     $wc = Get-WebClient -Token $Token
-    try
-    {
-        $wc.DownloadFile($url,$file)
+    try {
+        $wc.DownloadFile($url, $file)
         Write-Host "    Finished TFVC content download"
-    } catch 
-    {
+    }
+    catch {
         Write-Host "    No TFVC content for project"
     }
 }
 
-function Get-GitBranchesForRepo
-{
- param
+function Get-GitBranchesForRepo {
+    param
     (
         $instance ,
         $Token,
@@ -183,20 +176,18 @@ function Get-GitBranchesForRepo
     
     $url = "https://$instance.visualstudio.com/$projectname/_apis/git/repositories/$repo/stats/branches?api-version=4.1"
     
-    try
-    {
+    try {
         $wc = Get-WebClient -Token $Token
         $jsondata = $wc.DownloadString($url) | ConvertFrom-Json 
-        $jsondata.value | select-object -property @{Name="Name"; Expression = {$_.name}}
-    } catch
-    {
-          Write-Host "    No Repos for project"
+        $jsondata.value | select-object -property @{Name = "Name"; Expression = { $_.name } }
+    }
+    catch {
+        Write-Host "    No Repos for project"
     }
 }
 
-function Get-GitContent
-{
- param
+function Get-GitContent {
+    param
     (
         $instance ,
         $Token,
@@ -215,14 +206,13 @@ function Get-GitContent
     $file = "$backuppath\GIT-$projectname-$repo-$fixedbranch.zip"
     
     $wc = Get-WebClient -Token $Token
-    $wc.DownloadFile($url,$file)
+    $wc.DownloadFile($url, $file)
     Write-Host "    Finished GIT content download"
 }
 
 
-function Git-GetRepos
-{
- param
+function Git-GetRepos {
+    param
     (
         $instance,
         $Token,
@@ -234,24 +224,22 @@ function Git-GetRepos
     $wc = Get-WebClient -Token $Token
 
     $jsondata = $wc.DownloadString($url) | ConvertFrom-Json 
-    $jsondata.value | select-object -property @{Name="Name"; Expression = {$_.name}},@{Name="RemoteUrl"; Expression = {$_.remoteUrl}}
+    $jsondata.value | select-object -property @{Name = "Name"; Expression = { $_.name } }, @{Name = "RemoteUrl"; Expression = { $_.remoteUrl } }
 
 }
 
 
-function Add-Folder
-{
-param
+function Add-Folder {
+    param
     (
         $Path
     )
 
-    if ((Test-Path($Path)) -eq $false)
-    {
+    if ((Test-Path($Path)) -eq $false) {
         Write-Host "  Creating folder $Path"
         New-Item -ItemType directory -Path $Path -force | Out-Null
-    } else 
-    {
+    }
+    else {
         Write-Host "  Cleaning folder $Path"
         Remove-Item "$Path" -Force -Recurse
     }
@@ -259,9 +247,8 @@ param
 }
 
 
-function Backup-AzureDevops
-{
-param
+function Backup-AzureDevops {
+    param
     (
         [Parameter(Mandatory = $true)]
         [string]$Token,
@@ -280,12 +267,11 @@ param
     $instancepath = Join-Path -Path $backuppath -ChildPath $instance
     Add-Folder -Path $instancepath
 
-    foreach ($project in $projects)
-    {
+    foreach ($project in $projects) {
         $name = $project.Name
         Write-Host "Procesing project $name" -ForegroundColor Green
 
-        if ($BackupWorkItems){
+        if ($BackupWorkItems) {
             $workitemtypes = Get-WorkItemTypes -Token $Token -Instance $instance -Project $project.Name
             $workitemtypes | Format-Table
         }
@@ -295,13 +281,11 @@ param
     
         $repos = Git-GetRepos -instance $instance -Token $Token -projectname $name 
 
-        if ($repos.count -eq 0)
-        {
+        if ($repos.count -eq 0) {
             Write-Host "    No GIT content for project"
-        } else
-        {
-            foreach ($repo in $repos)
-            {
+        }
+        else {
+            foreach ($repo in $repos) {
                 Get-GitRepo -name $repo.Name -uri $repo.remoteurl -backuppath $projectpath -Token $Token
                     
                 # If you wish to get the repo's as simple ZIPs
@@ -319,9 +303,8 @@ param
     Write-Host "`n"
 }
 
-function Export-VSTSWorkItem  
-{  
-<#  
+function Export-VSTSWorkItem {  
+    <#  
 .SYNOPSIS  
     A PowerShell function to export Visual Studio Team Servies work items.   
 .DESCRIPTION  
@@ -357,7 +340,7 @@ function Export-VSTSWorkItem
         [string] $WorkItemType = "All",
 
         [Parameter()]
-        [string[]] $WorkItemFields = @('System.Id','System.Title','System.AssignedTo','System.State','System.CreatedBy','System.WorkItemType'),    
+        [string[]] $WorkItemFields = @('System.Id', 'System.Title', 'System.AssignedTo', 'System.State', 'System.CreatedBy', 'System.WorkItemType'),    
  
         # Export in your favorite format.  
         [Parameter()]  
@@ -365,43 +348,35 @@ function Export-VSTSWorkItem
         [string] $ExportAs
     )  
       
-    begin  
-    {  
+    begin {  
     }  
       
-    process  
-    {  
+    process {  
         $Authentication = (":$Token")  
         $Authentication = [System.Text.Encoding]::ASCII.GetBytes($Authentication)  
         $Authentication = [System.Convert]::ToBase64String($Authentication)  
-        switch ($WorkItemType)  
-        {  
-            "Bug"  
-            {  
+        switch ($WorkItemType) {  
+            "Bug" {  
                 $Body = @{  
                     Query = "Select * from WorkItems WHERE [System.WorkItemType] = '$WorkItemType'"  
                 } | ConvertTo-Json  
             }  
-            "Task"  
-            {  
+            "Task" {  
                 $Body = @{  
                     Query = "Select * from WorkItems WHERE [System.WorkItemType] = '$WorkItemType'"  
                 } | ConvertTo-Json  
             }  
-            "Epic"  
-            {  
+            "Epic" {  
                 $Body = @{  
                     Query = "Select * from WorkItems WHERE [System.WorkItemType] = '$WorkItemType'"  
                 } | ConvertTo-Json  
             }  
-            "Feature"  
-            {  
+            "Feature" {  
                 $Body = @{  
                     Query = "Select * from WorkItems WHERE [System.WorkItemType] = '$WorkItemType'"  
                 } | ConvertTo-Json  
             }
-            "All"
-            {  
+            "All" {  
                 $Body = @{  
                     Query = "Select * from WorkItems"  
                 } | ConvertTo-Json  
@@ -416,12 +391,10 @@ function Export-VSTSWorkItem
             }  
             Body        = $Body  
         }  
-        try  
-        {  
+        try {  
             $Id = (Invoke-RestMethod @RestParams).workitems.id -join ","  
-            if (-not ([string]::IsNullOrEmpty($Id)))  
-            {  
-                if(-not($WorkItemFields -eq $null)){
+            if (-not ([string]::IsNullOrEmpty($Id))) {  
+                if (-not($WorkItemFields -eq $null)) {
                     $Fields = @($WorkItemFields) -join ","    
                 }
                 else {
@@ -431,32 +404,25 @@ function Export-VSTSWorkItem
                 $RestParams["Method"] = "Get"  
                 $RestParams.Remove("Body")  
                 $Result = Invoke-RestMethod @RestParams  
-                if (! $PSBoundParameters['ExportAs'])  
-                {  
+                if (! $PSBoundParameters['ExportAs']) {  
                     ($Result.value.fields)  
                 }  
             }  
-            else  
-            {  
+            else {  
                 Write-Warning "No Items are available in $WorkItemType"  
             }  
           
-            switch ($ExportAs)  
-            {  
-                'csv'  
-                {  
+            switch ($ExportAs) {  
+                'csv' {  
                     $Result.value.fields | Export-Csv ".\$($WorkItemType)-WorkItems.csv" -NoTypeInformation   
                 }  
-                'HTML'  
-                {  
+                'HTML' {  
                     $Result.value.fields | Export-Csv .\$WorkItemType.html -NoTypeInformation   
                 } 
-                'JSON'  
-                {  
+                'JSON' {  
                     $Result.value.fields | ConvertTo-Json -Depth 50 | Out-File ".\$($WorkItemType)-WorkItems.json"
                 }  
-                'FancyHTML'  
-                {  
+                'FancyHTML' {  
                     Add-Content  ".\style.CSS"  -Value " body {   
                     font-family:Calibri;   
                     font-size:10pt;   
@@ -472,13 +438,251 @@ function Export-VSTSWorkItem
                 }  
             }  
         }  
-        catch  
-        {
+        catch {
             Write-host $_.Exception.Message -ForegroundColor Red  
         }  
     }  
       
-    end  
-    {  
+    end {  
     }  
-}  
+}
+
+function Invoke-Menu {
+    [cmdletbinding()]
+    Param(
+        [Parameter(Position = 1)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Title = "My Menu",
+        [Alias("cls")]
+        [switch]$ClearScreen
+    )
+     
+    #clear the screen if requested
+    if ($ClearScreen) { 
+        Clear-Host 
+    }
+    #region
+    $menu = @"
+(Y)es
+(S)kip task
+(Q)uit or CTRL-C to exit
+ 
+Select a task by number or Q to quit
+"@
+    #endregion
+    #build the menu prompt
+    $menuPrompt = $title
+    #add a return
+    $menuprompt += "`n"
+    #add an underline
+    $menuprompt += "-" * $title.Length
+    #add another return
+    $menuprompt += "`n"
+    #add the menu
+    $menuPrompt += $menu
+     
+    $KeyPressed = Read-Host -Prompt $menuprompt
+
+    Switch ($KeyPressed) {
+        "Y" {
+            Write-Host "Yes, continue!" -ForegroundColor red
+            return $true
+        } 
+        "S" {
+            Write-Host "Skip" -ForegroundColor Yellow
+            return $false
+        }
+        "Q" {
+            Write-Host "Goodbye" -ForegroundColor Cyan
+            Exit 0
+        }
+        Default {
+            Write-Warning "Invalid Choice. Try again."
+            sleep -milliseconds 750
+        }
+    }
+     
+}
+function Invoke-GitMigration {
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory = $False)] [uri] $SourceRepo,
+        [parameter(Mandatory = $False)] [uri] $DestinationRepo,
+        [parameter(Mandatory = $False)] [string] $SourceProject,
+        [parameter(Mandatory = $False)] [string] $Location
+    )
+
+    if ([string]::IsNullOrEmpty($Location)) {
+        $Location = "$env:temp\$(new-guid)"
+    }
+
+    $continue = Invoke-Menu -Title "Start Git migration"
+    if ($continue) {
+        git clone --mirror $SourceProjectUri $Location
+        Set-Location -Path $Location
+        git remote set-url origin $DestinationProjectUri
+        git push -f
+        Set-Location -Path $PSScriptRoot
+        Remove-Item $Location -Force -Recurse
+    }
+}
+function Install-AzCLI {
+    Write-Host "Not implemented yet!"
+}
+function Install-Nuget {
+    $nugetUrl = "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
+    Invoke-WebRequest -Uri $nugetUrl -OutFile ".\nuget.exe"
+}
+function Invoke-AzDevopsProjectCheck {
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory = $False)] [uri] $OrgUri,
+        [parameter(Mandatory = $False)] [string] $Project
+    )
+    $command = "az devops project show -p $($Project) --org $($OrgUri)"
+    $actionResult = Invoke-Expression $command
+    [psobject]$objProject = $actionResult | ConvertFrom-Json
+
+    if ([string]::IsNullOrEmpty($objProject.name)) {
+        Write-Verbose "Project: $($Project) does not exist in Organisation: $($OrgUri)"
+        return $false
+    }
+    else {
+        Write-Verbose "Project: $($Project) already exist in Organisation: $($OrgUri)"
+        return $true
+    }
+}
+function New-AzDevopsProject {
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory = $False)] [uri] $OrgUri,
+        [parameter(Mandatory = $False)] [string] $Project,
+        [parameter(Mandatory = $False)] [string] $Process,
+        [parameter(Mandatory = $False)] [string] $Description,
+        [parameter(Mandatory = $False)] [string] $SourceControl,
+        [parameter(Mandatory = $False)] [string] $Visibility
+
+    )
+    Write-Verbose "AZ Cli command: $($command)"
+    $command = az devops project create --name $($Project) --description $($Description) --detect 'off' --org $($OrgUri) --process $($Process) --source-control $($SourceControl) --visibility $($Visibility)
+    $result = $command | ConvertFrom-Json
+    return $result        
+}
+function Invoke-AzDevOpsMigConfiguration {
+    [CmdletBinding()]
+    param (
+        [parameter(Mandatory = $False)] [string] $Configuration,
+        [parameter(Mandatory = $False)] [bool] $Confirm = $True,
+        [parameter(Mandatory = $False)] [string] $QueryBit,
+        [parameter(Mandatory = $False)] [string] $Processor = "VstsSyncMigrator.Engine.Configuration.Processing.WorkItemMigrationConfig",
+        [parameter(Mandatory = $False)] [string] $Label
+
+    )
+
+    if (-not([string]::IsNullOrEmpty($QueryBit))) {
+        $json = Get-AzDevOpsMigConfiguration -ConfigPath $Configuration
+        $WorkItemMigrationConfig = $json.Processors | Where-Object { $_.ObjectType -eq $Processor }
+        $WorkItemMigrationConfig.QueryBit = $QueryBit
+        Save-AzDevOpsMigConfiguration -ConfigObject $json -Outfile $Configuration
+    }
+    if ([string]::IsNullOrEmpty($Label)) {
+        $LogFile = "$($Configuration).log"    
+    }
+    else {
+        $LogFile = "$($Configuration)-$($Label).log"
+    }
+
+    if ($Confirm) { 
+        $Continue = Invoke-Menu -Title "Start Azure Devops Migration $($Configuration) $($Label)"        
+    }
+    else {
+        $Continue = $True
+    }
+
+    if ($Continue) {       
+        $command = "$($env:VSTSSyncHome)\migration.exe execute -c $($Configuration)"
+        Write-Verbose "Run $($command)" 
+        Invoke-Expression $command | Tee-Object -FilePath ".\$($LogFile)" -Append
+    }
+}
+function Invoke-AzDevOpsMigPlan {
+    [CmdletBinding()]
+    param (
+        [parameter(Mandatory = $False)] [string] $Project = ".\MigrationProject.json"
+    )
+
+    $obj = (Get-Content -Raw MigrationProject.json | ConvertFrom-Json)
+    $obj.MigrationConfigs
+    foreach ($config in $obj.MigrationConfigs) {
+        Invoke-AzDevOpsMigConfiguration -Configuration $_
+    }   
+}
+
+function Get-AzDevOpsMigProject {
+    [CmdletBinding()]
+    param (
+        [parameter(Mandatory = $False)] [string] $Project = ".\MigrationProject.json"
+    )
+
+    $obj = (Get-Content -Raw $Project | ConvertFrom-Json)
+    $obj.MigrationConfigs | ForEach-Object( { Write-Host $_ })
+    return $obj
+}
+function Show-AzDevOpsMigProject {
+    [CmdletBinding()]
+    param (
+        [parameter(Mandatory = $False)] [string] $Project = ".\MigrationProject.json"
+    )
+    $obj = (Get-Content -Raw $Project | ConvertFrom-Json)
+    $obj.MigrationConfigs | ForEach-Object( { Write-Host $_ })
+    foreach ($config in $obj.MigrationConfigs) {
+        Write-Host $_
+    }
+}
+function Get-AzDevopsProject {
+    [CmdletBinding()]
+    param(
+        [parameter(Mandatory = $False)] [uri] $DestinationOrgUri,
+        [parameter(Mandatory = $False)] [string] $DestinationProject
+    )
+    $Query = az devops project show -p $($DestinationProject) --org $($DestinationOrgUri) | Out-Null
+    if ($null -eq $Query) {
+        $result = $null
+    }
+    else {
+        $result = $query | ConvertFrom-Json
+    }
+        
+    return $result
+}
+function Get-AzDevOpsMigConfiguration {
+    param(
+        [parameter(Mandatory = $False, ValueFromPipeline = $true)] 
+        [string] $ConfigPath
+    )
+    $ConfigObject = Get-Content -Raw $ConfigPath | ConvertFrom-Json
+    return $ConfigObject
+}
+function Save-AzDevOpsMigConfiguration {
+    param (
+        [parameter(Mandatory = $False, ValueFromPipeline = $true)] 
+        [psobject] $ConfigObject,
+        [parameter(
+            Mandatory = $False)] 
+        [psobject] $Outfile = ".\test.json"
+
+    )
+
+    $ConfigObject | ConvertTo-Json -Depth 99 -Compress | ForEach-Object { [System.Text.RegularExpressions.Regex]::Unescape($_) } | Set-Content $Outfile -Force  
+}
+function New-AzDevOpsMigConfiguration {
+    param (
+        [parameter(
+            Mandatory = $False)] 
+        [psobject] $Outfile = ".\new.json"
+    )
+
+    $DefaultConfig = Get-Content -Raw .\default.json | ConvertFrom-Json
+    $DefaultConfig
+    $DefaultConfig | ConvertTo-Json -Depth 99 -Compress | ForEach-Object { [System.Text.RegularExpressions.Regex]::Unescape($_) } | Set-Content $Outfile -Force  
+}

@@ -1,10 +1,20 @@
 # NO.AzureDevopsTools
-
 ## Requirements
-- N/A
+- Windows Powershell 5.1 or Powershell Core 6.1
+- Azure CLI (2.0.64)
+- Azure Devops extension for Azure CLI
+- Azure Devops Migration Tools (7.5.66) from nkdAgility - https://github.com/nkdAgility/azure-devops-migration-tools
 
 ## Getting Started
-A Powershell module to export TFS/GIT repos and workitems hosted on AzureDevops
+A Powershell module to migrate/export/import Repos en WorkItems from TFS to Azure Devops
+
+### How to install Azure CLI
+Go to https://github.com/Azure/azure-cli
+
+### How to install Azure Devops extension for Azure CLI
+```
+az extension add --name azure-devops
+```
 
 ### Install from source
 1. Download this repository
